@@ -27,10 +27,13 @@ RUN docker-php-source extract \
     && docker-php-source delete
 
 # imagick
-RUN apk add --update --no-cache autoconf g++ imagemagick-dev libtool make pcre-dev \
-    && pecl install imagick \
+RUN set -ex \
+    && apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS imagemagick-dev libtool \
+    && export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS" \
+    && pecl install imagick-3.4.3 \
     && docker-php-ext-enable imagick \
-    && apk del autoconf g++ libtool make pcre-dev
+    && apk add --no-cache --virtual .imagick-runtime-deps imagemagick \
+    && apk del .phpize-deps
 
 # git client, mysql-client
 RUN apk add --update --no-cache git mysql-client
